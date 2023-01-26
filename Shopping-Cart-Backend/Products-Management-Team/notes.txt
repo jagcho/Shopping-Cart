@@ -1,0 +1,5 @@
+1)fetch the last 10 customer of productid x
+
+Following is the query to get last inserted document −
+
+> db.getLastInsertedDocument.find({}).sort({_id:-1}).limit(1);
