@@ -1,8 +1,57 @@
-import {React} from 'react';
-import { Link } from 'react-router-dom'
+import {React,useEffect,useState} from 'react';
+import { Link ,useNavigate } from 'react-router-dom'
 import { Col, Button, Row, Container, Card, Form } from 'react-bootstrap';
 
 export  function LogIn() {
+  const data = {  email: '', Password: ''}
+  const [inputData, setInputData] = useState(data)
+  const [flag,setflag]=useState(false)
+  useEffect(()=>{
+     console.log('Logged-In')
+  },[flag])
+  function handleData(e) {
+    setInputData((inputData)=>{
+      const updatedInputData={ ...inputData, [e.target.name]: e.target.value }
+      return updatedInputData
+    })
+  }
+
+    async function PostData (e){
+      e.preventDefault();
+      const {email,Password}=inputData;
+       if ( !email || !Password ) {
+
+       return  alert('All fields are Mandatory')
+
+      } else{
+         setflag(true)
+          }
+      
+          
+    const res =await fetch("/login",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      
+      body:JSON.stringify(inputData)
+    });
+
+    const data = await res.json()
+         if(res.status ===400 || !data){
+         return alert(`${data.message}`)
+          
+         }else{
+          goToStore()
+        return  alert(`${data.message}`)
+         }
+    }
+  
+    const navigate=useNavigate()
+  function goToStore(){
+        navigate("/store")
+  }
+  
   return (
     <div>
       <Container>
@@ -15,12 +64,12 @@ export  function LogIn() {
                      <img src='/imgs/logo.jpg' style={{width:'125px',height:'75px' ,objectFit:'cover',borderRadius:"95%"}}alt=''/>
                   </h2>
                   <div className="mb-3">
-                    <Form>
-                      <Form.Group className="mb-3" controlId="formBasicEmail">
+                    <Form >
+                      <Form.Group className="mb-3" controlId="formBasicEmail" >
                         <Form.Label className="text-center">
                           Email address
                         </Form.Label>
-                        <Form.Control type="email" placeholder="Enter email" />
+                        <Form.Control type="email" placeholder="Enter email" name="email" value={inputData.name} onChange={handleData}/>
                       </Form.Group>
 
                       <Form.Group
@@ -28,19 +77,17 @@ export  function LogIn() {
                         controlId="formBasicPassword"
                       >
                         <Form.Label>Password</Form.Label>
-                        <Form.Control type="password" placeholder="Password" />
+                        <Form.Control type="password" placeholder="Password" name="Password" value={inputData.Password} onChange={handleData}/>
                       </Form.Group>
                       <Form.Group
                         className="mb-3"
                         controlId="formBasicCheckbox"
                       ></Form.Group>
-                      <Link to="/store">
                       <div className="d-grid">
-                        <Button variant="primary" type="submit" >
+                      <Button variant="primary" type="submit" onClick={PostData}>
                           Log-In
                         </Button>
                         </div>
-                        </Link>
                     </Form>
                     <div className="mt-3">
                       <p className="mb-0  text-center">

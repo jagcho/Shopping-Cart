@@ -42,7 +42,7 @@ const isValidRequestBody = function (requestBody) {
 
 const isValidData = function (value) {
   if (typeof value === "undefined" || value === null) return false;
-  if (typeof value === "string" && value.trim().length == 0) return false;
+ // if (typeof value === "string" && value.trim().length == 0) return false;
   return true;
 };
 
@@ -53,9 +53,8 @@ const isValidData = function (value) {
 const createUser = async function (req, res) {
   try {
     let data = req.body;
-
-    const { fname, lname, email, phone, password } = data;
-
+    
+    const { name, email,  password ,phone,profileImage} = data;
     let files = req.files;
     //===== validate body ======//
     if (!isValidRequestBody(data)) {
@@ -65,32 +64,21 @@ const createUser = async function (req, res) {
     }
 
     //===== validate fname ======//
-    if (!isValidData(fname)) {
+    if (!isValidData(name)) {
       return res
         .status(400)
         .send({ status: false, message: "please enter your first Name" });
     }
-    if (!/^\s*[a-zA-Z ]{2,}\s*$/.test(fname)) {
+    if (!/^\s*[a-zA-Z ]{2,}\s*$/.test(name)) {
       return res.status(400).send({
         status: false,
-        message: `Heyyy....! ${fname} is not a valid first name`,
+        message: `Heyyy....! ${name} is not a valid first name`,
       });
     }
-    data.fname = fname.trim().split(" ").filter((word) => word).join(" ");
+    data.name = name.trim().split(" ").filter((word) => word).join(" ");
 
-    //===== validate  lname  ======//
-    if (!isValidData(lname)) {
-      return res
-        .status(400)
-        .send({ status: false, message: "please enter your last Name" });
-    }
-    if (!/^\s*[a-zA-Z ]{2,}\s*$/.test(lname)) {
-      return res.status(400).send({
-        status: false,
-        message: `Heyyy....! ${lname} is not a valid  last name`,
-      });
-    }
-    data.lname = lname.trim().split(" ").filter((word) => word).join(" ");
+    
+
 
     //===== validate email ======//
     if (!isValidData(email)) {
@@ -112,23 +100,23 @@ const createUser = async function (req, res) {
 
     data.email = email.trim();
 
-    //===== validate and uplode profile photo ======//
-    let fileData = files[0];
-    console.log(fileData)
-    if (files.length == 0) {
-      return res.status(400).send({ message: "No Profile image found" });
-    }
+    // ===== validate and uplode profile photo ======//
+    // let fileData = files[0];
+    // console.log(fileData)
+    // if (files.length == 0) {
+    //   return res.status(400).send({ message: "No Profile image found" });
+    // }
 
-    if (!/([/|.|\w|\s|-])*\.(?:jpg|jpeg|png|JPG|JPEG|PNG)/.test(fileData.originalname)) {
-      return res
-        .status(400)
-        .send({ status: false, message: "please Add your profile Image with a valid only in JPG JPEG PNG." });
-    }
+    // if (!/([/|.|\w|\s|-])*\.(?:jpg|jpeg|png|JPG|JPEG|PNG)/.test(fileData.originalname)) {
+    //   return res
+    //     .status(400)
+    //     .send({ status: false, message: "please Add your profile Image with a valid only in JPG JPEG PNG." });
+    // }
 
-    if (files && files.length > 0) {
-      let uploadedFileURL = await uploadFile(files[0]);
-      data.profileImage = uploadedFileURL;
-    }
+    // if (files && files.length > 0) {
+    //   let uploadedFileURL = await uploadFile(files[0]);
+    //   data.profileImage = uploadedFileURL;
+    // }
 
     //===== validate phone ======//
     if (!isValidData(phone)) {
@@ -154,9 +142,10 @@ const createUser = async function (req, res) {
         });
     }
 
-    data.phone = phone.trim();
+    // data.phone = phone.trim();
 
     //===== validate and hash password ======//
+   
     if (!isValidData(password)) {
       return res.status(400).send({
         status: false,
@@ -169,95 +158,97 @@ const createUser = async function (req, res) {
         message: "please enter valid password min 8 or max 15 digit",
       });
     }
+
     //hashing
     const saltRounds = 10;
     const hash = bcrypt.hashSync(password, saltRounds);
     data.password = hash;
 
     //===== validate address ======//
-    try {
-      data.address = JSON.parse(data.address);
-    } catch {
-      return res.status(400).send({ msg: "please enter  valid details || valid pincode" });
-    }
+    // try {
+    //   data.address = JSON.parse(data.address);
+    // } catch {
+    //   return res.status(400).send({ msg: "please enter  valid details || valid pincode" });
+    // }
 
-    if (!data.address) {
-      return res
-        .status(400)
-        .send({ status: false, msg: "please add address details" });
-    }
-    if (!data.address.shipping) {
-      return res
-        .status(400)
-        .send({ status: false, msg: "please add shipping details" });
-    }
-    if (
-      !isValidData(data.address.shipping.street) ||
-      !/^\s*[a-zA-Z0-9 .,-:]{2,}\s*$/.test(
-        data.address.shipping.street
-      )
-    ) {
-      return res
-        .status(400)
-        .send({ status: false, msg: "please add valid shipping street" });
-    }
+    // if (!data.address) {
+    //   return res
+    //     .status(400)
+    //     .send({ status: false, msg: "please add address details" });
+    // }
+    // if (!data.address.shipping) {
+    //   return res
+    //     .status(400)
+    //     .send({ status: false, msg: "please add shipping details" });
+    // }
+    // if (
+    //   !isValidData(data.address.shipping.street) ||
+    //   !/^\s*[a-zA-Z0-9 .,-:]{2,}\s*$/.test(
+    //     data.address.shipping.street
+    //   )
+    // ) {
+    //   return res
+    //     .status(400)
+    //     .send({ status: false, msg: "please add valid shipping street" });
+    // }
 
-    if (
-      !isValidData(data.address.shipping.city) ||
-      !/^([a-zA-Z\.]+)$/.test(data.address.shipping.city)
-    ) {
-      return res
-        .status(400)
-        .send({ status: false, msg: "please add valid shipping city" });
-    }
+    // if (
+    //   !isValidData(data.address.shipping.city) ||
+    //   !/^([a-zA-Z\.]+)$/.test(data.address.shipping.city)
+    // ) {
+    //   return res
+    //     .status(400)
+    //     .send({ status: false, msg: "please add valid shipping city" });
+    // }
 
-    if (
-      !isValidData(data.address.shipping.pincode) ||
-      !/^[1-9]{1}[0-9]{2}[0-9]{3}$/.test(data.address.shipping.pincode)
-    ) {
-      return res
-        .status(400)
-        .send({ status: false, msg: "please add valid shipping pincode" });
-    }
+    // if (
+    //   !isValidData(data.address.shipping.pincode) ||
+    //   !/^[1-9]{1}[0-9]{2}[0-9]{3}$/.test(data.address.shipping.pincode)
+    // ) {
+    //   return res
+    //     .status(400)
+    //     .send({ status: false, msg: "please add valid shipping pincode" });
+    // }
 
-    if (!data.address.billing) {
-      return res
-        .status(400)
-        .send({ status: false, msg: "please add billing details  " });
-    }
-    if (
-      !isValidData(data.address.billing.street) ||
-      !/^\s*[a-zA-Z0-9 .,-:]{2,}\s*$/.test(
-        data.address.billing.street
-      )
-    ) {
-      return res
-        .status(400)
-        .send({ status: false, msg: "please add valid billing street" });
-    }
+    // if (!data.address.billing) {
+    //   return res
+    //     .status(400)
+    //     .send({ status: false, msg: "please add billing details  " });
+    // }
+    // if (
+    //   !isValidData(data.address.billing.street) ||
+    //   !/^\s*[a-zA-Z0-9 .,-:]{2,}\s*$/.test(
+    //     data.address.billing.street
+    //   )
+    // ) {
+    //   return res
+    //     .status(400)
+    //     .send({ status: false, msg: "please add valid billing street" });
+    // }
 
-    if (
-      !isValidData(data.address.billing.city) ||
-      !/^([a-zA-Z]+)$/.test(data.address.billing.city)
-    ) {
-      return res
-        .status(400)
-        .send({ status: false, msg: "please add valid billing city" });
-    }
+    // if (
+    //   !isValidData(data.address.billing.city) ||
+    //   !/^([a-zA-Z]+)$/.test(data.address.billing.city)
+    // ) {
+    //   return res
+    //     .status(400)
+    //     .send({ status: false, msg: "please add valid billing city" });
+    // }
 
-    if (
-      !isValidData(data.address.billing.pincode) ||
-      !/^[1-9]{1}[0-9]{2}[0-9]{3}$/.test(data.address.billing.pincode)
-    ) {
-      return res
-        .status(400)
-        .send({ status: false, msg: "please add valid billing pincode" });
-    }
+    // if (
+    //   !isValidData(data.address.billing.pincode) ||
+    //   !/^[1-9]{1}[0-9]{2}[0-9]{3}$/.test(data.address.billing.pincode)
+    // ) {
+    //   return res
+    //     .status(400)
+    //     .send({ status: false, msg: "please add valid billing pincode" });
+    // }
     //===== create user ======//
+   
     let createUserDoc = await userModel.create(data);
     return res.status(201).send({
       status: true,
-      message: "User created Successfully",
+      message: "Registered Successfully",
       data: createUserDoc,
     });
   } catch (err) {
@@ -271,39 +262,39 @@ const createUser = async function (req, res) {
 let loginUser = async function (req, res) {
   try {
     let data = req.body;
-    const email1 = data.email;
-    const password1 = data.password;
+    
+    const {email,Password} =data
 
     if (Object.keys(data).length == 0) {
       return res
         .status(400)
         .send({ status: false, message: "Please provide details in body" });
     }
-    if (!email1 || email1.trim().length == 0) {
+    if (!email|| email.trim().length == 0) {
       return res
         .status(400)
         .send({ status: false, message: "Please provide Email" });
     }
-    if (!password1 || password1.trim().length == 0) {
+    if (!Password || Password.trim().length == 0) {
       return res
         .status(400)
         .send({ status: false, message: "Please provide Password" });
     }
-    if (!/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(email1)) {
+    if (!/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(email)) {
       return res.status(400).send({
         status: false,
         message: "Email should be valid email address",
       });
     }
-    if (!/^.{8,15}$/.test(password1)) {
+    if (!/^.{8,15}$/.test(Password)) {
       return res.status(400).send({
         status: false,
         message: "password length should be in between 8 to 15",
       });
     }
 
-    let userData = await userModel.findOne({ email: email1 });
-    console.log(userData)
+    let userData = await userModel.findOne({ email: email });
+    
     if (!userData) {
       return res.status(400).send({
         status: false,
@@ -311,7 +302,7 @@ let loginUser = async function (req, res) {
       });
     }
 
-    const checkPassword = await bcrypt.compare(password1, userData.password)
+    const checkPassword = await bcrypt.compare(Password, userData.password)
 
     if (!checkPassword) return res.status(401).send({ status: false, message: `Login failed!! password is incorrect.` });
     let userId = userData._id
